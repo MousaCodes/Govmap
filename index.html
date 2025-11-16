@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>GovMap בתוך האתר שלי</title>
+
+  <!-- טעינת GovMap API - אסור להוריד קובץ מקומי, חייבים מה-URL -->
+  <script
+    src="https://www.govmap.gov.il/govmap/api/govmap.api.js"
+    defer
+    onload="initGovMap()">
+  </script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 10px 20px;
+      background: #1b4b7f;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #map {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+
+  <script type="text/javascript">
+    function initGovMap() {
+      // כאן אתה שם את ה-token שקיבלת ממפ"י
+      const token = "";
+
+      govmap.createMap("map", {
+        token: token,
+        // שכבות לדוגמה – אפשר להחליף לפי מה שאתה צריך
+        layers: ["PARCEL_ALL","219092", "218852","217414"],
+        showXY: true,
+        identifyOnClick: true,
+        isEmbeddedToggle: false,
+        background: "1",   // מפות רקע
+        layersMode: 2,
+        zoomButtons: true
+      });
+    }
+  </script>
+</head>
+
+<body>
+  <header>
+    <h1>האתר של מוסא – GovMap Embedded</h1>
+    <div>כאן בעתיד נוסיף כפתורי גוש/חלקה, שכבות IFRS וכו'</div>
+  </header>
+
+  <main>
+    <div id="map"></div>
+  </main>
+</body>
+</html>
