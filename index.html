@@ -2,9 +2,8 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>GovMap בתוך האתר שלי</title>
+  <title>GovMap – חיפוש שכבות</title>
 
-  <!-- טעינת GovMap API - אסור להוריד קובץ מקומי, חייבים מה-URL -->
   <script
     src="https://www.govmap.gov.il/govmap/api/govmap.api.js"
     defer
@@ -17,67 +16,128 @@
       font-family: Arial, sans-serif;
       height: 100vh;
       display: flex;
-      flex-direction: column;
     }
-
-    header {
-      padding: 10px 20px;
-      background: #1b4b7f;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 18px;
-    }
-
-    main {
-      flex: 1;
+    #sidebar {
+      width: 280px;
+      border-left: 1px solid #ddd;
+      padding: 10px;
+      box-sizing: border-box;
       display: flex;
       flex-direction: column;
+      gap: 8px;
     }
-
     #map {
       flex: 1;
+    }
+    #layerSearch {
       width: 100%;
-      height: 100%;
+      padding: 5px 8px;
+      box-sizing: border-box;
+    }
+    #layerList {
+      flex: 1;
+      overflow-y: auto;
+      border: 1px solid #eee;
+      padding: 5px;
+    }
+    .layer-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 0;
+      font-size: 14px;
     }
   </style>
 
-  <script type="text/javascript">
+  <script>
+    // All layers you want available in your app
+    const ALL_LAYERS = [
+      { id: "PARCEL_ALL", name: "חלקות" },
+      { id: "219092",    name: "שכבת IFRS / שכבת משתמש" },
+      {id: "SUB_GUSH_ALL", name: "גושים"},
+      {id: "atikot_sites_itm", name: "עתיקות"},
+      {id: "Soil_survey", name: "סקר קרקעות"},
+      { id: "4", name: "קווי רכבת קלה"},
+      { id: "16", name: "כבישים משניים" },
+      { id: "407", name: "תחנות רכבת" },
+      { id: "151", name: "תחנות מטרו" },
+      { id: "149", name: "תחנות רכבת קלה" },
+      { id: "160", name: "קווי מטרו" },
+      { id: "218852", name: "מאגר החלטות בהשגה ראשונה" },
+      { id: "217414", name: "שומות מכריעות" },
+      { id: "22", name: "שכונות" }
+    ];
+
     function initGovMap() {
-      // כאן אתה שם את ה-token שקיבלת ממפ"י
-      const token = "";
+      const token = "f683abfd-c77e-461a-a41e-7a80d4b46cb2";
 
       govmap.createMap("map", {
         token: token,
-        // שכבות לדוגמה – אפשר להחליף לפי מה שאתה צריך
-        layers: ["SUB_GUSH_ALL", "PARCEL_ALL", "4","16", "407", "151", "149", "160",
-                  "219092", "218852","217414", 
-                  "atikot_sites_itm",  "Soil_survey",  "22"
-        ],
+        layers: ALL_LAYERS.map(l => l.id),     // all layers available
+        background: "0",
+        layersMode: 2,
         showXY: true,
         identifyOnClick: true,
-        isEmbeddedToggle: false,
-        background: "0",   // מפות רקע
-        layersMode: 2,
         zoomButtons: true
       });
+
+      renderLayerList(""); // first render with no filter
+    }
+
+    function renderLayerList(filterText) {
+      const listEl = document.getElementById("layerList");
+      listEl.innerHTML = "";
+
+      const term = filterText.trim().toLowerCase();
+
+      const filtered = ALL_LAYERS.filter(l =>
+        l.name.toLowerCase().includes(term) ||
+        l.id.toLowerCase().includes(term)
+      );
+
+      filtered.forEach(layer => {
+        const row = document.createElement("div");
+        row.className = "layer-item";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = true; // you can sync from govmap later if you want
+        checkbox.onchange = () => toggleLayer(layer.id, checkbox.checked);
+
+        const label = document.createElement("span");
+        label.textContent = `${layer.name} (${layer.id})`;
+
+        row.appendChild(checkbox);
+        row.appendChild(label);
+        listEl.appendChild(row);
+      });
+    }
+
+    function onLayerSearchInput() {
+      const val = document.getElementById("layerSearch").value;
+      renderLayerList(val);
+    }
+
+    function toggleLayer(layerId, turnOn) {
+      if (turnOn) {
+        govmap.setVisibleLayers([layerId], []);       // turn on only
+      } else {
+        govmap.setVisibleLayers([], [layerId]);       // turn off only
+      }
     }
   </script>
 </head>
-
 <body>
-  <header>
-    <h1>האתר של מוסא – GovMap Embedded</h1>
-    <div>כאן בעתיד נוסיף כפתורי גוש/חלקה, שכבות IFRS וכו'</div>
-  </header>
+  <div id="map"></div>
 
-  <main>
-    <div id="map"></div>
-  </main>
+  <div id="sidebar">
+    <input
+      id="layerSearch"
+      type="text"
+      placeholder="חפש שכבה לפי שם / ID…"
+      oninput="onLayerSearchInput()" />
+
+    <div id="layerList"></div>
+  </div>
 </body>
 </html>
