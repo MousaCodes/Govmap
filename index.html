@@ -101,7 +101,7 @@
 
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
-        checkbox.checked = true; // you can sync from govmap later if you want
+        checkbox.checked = false; // you can sync from govmap later if you want
         checkbox.onchange = () => toggleLayer(layer.id, checkbox.checked);
 
         const label = document.createElement("span");
@@ -126,6 +126,7 @@
       }
     }
   </script>
+  
 </head>
 <body>
   <div id="map"></div>
